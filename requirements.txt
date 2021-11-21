@@ -6,3 +6,4 @@ rich
 FastAPI
 uvicorn
 python-multipart
+jinja2
