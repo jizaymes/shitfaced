@@ -9,8 +9,9 @@ IMAGE_MODE = "RGBA"
 OUTPUT_FORMAT = 'PNG'
 RESIZE_SCALE = .1
 
-# DEBUG = True
 DEBUG = False
+DEBUG = True
+
 
 
 def debugLog(msg):
@@ -51,6 +52,7 @@ def process_image(infile, drawRectangle=False):
     infile_image = Image.open(BytesIO(infile)).convert(IMAGE_MODE)
 
     h, w = infile_image.size
+    debugLog(f"h {h} w {w}")
     if h < 150 and w < 150:
         return False
 

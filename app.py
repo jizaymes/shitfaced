@@ -12,8 +12,8 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 
-def allowed_file(file):
-    return '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.get('/', response_class=HTMLResponse)
@@ -27,14 +27,14 @@ async def upload_file(file: UploadFile = File(...)):
         with BytesIO(image) as file_like:
             yield from file_like
 
-    if file and allowed_file(file):
+    if file and allowed_file(file.filename):
         # The image file seems valid! Detect faces and return the result.
         content = await file.read()
         image = shitfaced.process_image(content, shitfaced.DEBUG)
 
         if image is False:
             content = """
-            Invalid file format
+            Invalid image dimensions, or an error occurred
             """
 
             return HTMLResponse(content)
