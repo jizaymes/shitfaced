@@ -22,7 +22,7 @@ async def root_get(request: Request):
 
 
 @app.post('/')
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(request: Request, file: UploadFile = File(...)):
     def iterimage(image):
         with BytesIO(image) as file_like:
             yield from file_like
@@ -33,16 +33,8 @@ async def upload_file(file: UploadFile = File(...)):
         image = shitfaced.process_image(content, shitfaced.DEBUG)
 
         if image is False:
-            content = """
-            Invalid image dimensions, or an error occurred
-            """
-
-            return HTMLResponse(content)
+            return templates.TemplateResponse('error.html', {'request': request, 'error': 'Invalid image dimensions, or an error occurred'})
 
         return StreamingResponse(iterimage(image.getvalue()), media_type=file.content_type)
     else:
-        content = """
-        Invalid file format
-        """
-
-        return HTMLResponse(content)
+        return templates.TemplateResponse('error.html', {'request': request, 'error': 'Invalid image format'})
