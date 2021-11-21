@@ -10,8 +10,7 @@ OUTPUT_FORMAT = 'PNG'
 RESIZE_SCALE = .1
 
 DEBUG = False
-DEBUG = True
-
+# DEBUG = True
 
 
 def debugLog(msg):
