@@ -1,20 +1,26 @@
 from PIL import Image, ImageDraw
 from pathlib import Path
-import face_recognition
 from io import BytesIO
 from rich import print
+
+import face_recognition
 
 OVERLAY_IMAGE = Path('./poop.png')
 IMAGE_MODE = "RGBA"
 OUTPUT_FORMAT = 'PNG'
 RESIZE_SCALE = .1
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-DEBUG = False
-# DEBUG = True
+# DEBUG = False
+DEBUG = True
 
 
 def debugLog(msg):
     print(f"{msg}") if DEBUG else False
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def get_faces_from_image(infile):
@@ -45,7 +51,7 @@ def apply_scaling(top, right, bottom, left, scale: float):
     return tt, rr, bb, ll
 
 
-def process_image(infile, drawRectangle=False):
+def process_image(infile, content_type, drawRectangle=False):
 
     # Convert the incoming image to a Pillow image in memory, and conver to the right mode
     infile_image = Image.open(BytesIO(infile)).convert(IMAGE_MODE)
@@ -85,4 +91,4 @@ def process_image(infile, drawRectangle=False):
     img_byte_arr = BytesIO()
     infile_image.save(img_byte_arr, format=OUTPUT_FORMAT)
 
-    return img_byte_arr
+    return img_byte_arr, content_type
