@@ -8,3 +8,6 @@ uvicorn
 python-multipart
 jinja2
 celery
+py-redis
+pymongo
+motor

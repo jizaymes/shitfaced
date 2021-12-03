@@ -3,13 +3,17 @@ from pathlib import Path
 from io import BytesIO
 from rich import print
 
+from celery import Celery
+
 import face_recognition
+import os
 
 OVERLAY_IMAGE = Path('./poop.png')
 IMAGE_MODE = "RGBA"
 OUTPUT_FORMAT = 'PNG'
 RESIZE_SCALE = .1
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_HOSTS = ["*"]
 
 # DEBUG = False
 DEBUG = True
@@ -17,6 +21,13 @@ DEBUG = True
 
 def debugLog(msg):
     print(f"{msg}") if DEBUG else False
+
+
+def setup_celery(name):
+    celery = Celery(name)
+    celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
+    celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
+    return celery
 
 
 def allowed_file(filename):
@@ -51,7 +62,7 @@ def apply_scaling(top, right, bottom, left, scale: float):
     return tt, rr, bb, ll
 
 
-def process_image(infile, content_type, drawRectangle=False):
+def process_image(infile, drawRectangle=False):
 
     # Convert the incoming image to a Pillow image in memory, and conver to the right mode
     infile_image = Image.open(BytesIO(infile)).convert(IMAGE_MODE)
@@ -91,4 +102,4 @@ def process_image(infile, content_type, drawRectangle=False):
     img_byte_arr = BytesIO()
     infile_image.save(img_byte_arr, format=OUTPUT_FORMAT)
 
-    return img_byte_arr, content_type
+    return img_byte_arr

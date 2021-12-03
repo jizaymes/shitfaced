@@ -1,13 +1,15 @@
-import shitfaced
-
 from celery.result import AsyncResult
 
 from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 
 from io import BytesIO
+
+import shitfaced
+import database
 
 from worker import create_task
 
@@ -16,6 +18,17 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=shitfaced.ALLOWED_HOSTS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+app.add_event_handler("shutdown", database.shutdown_mongo)
+
 
 @app.get('/', response_class=HTMLResponse)
 async def root_get(request: Request):
@@ -23,11 +36,14 @@ async def root_get(request: Request):
     return templates.TemplateResponse("index.html", {'request': request})
 
 
-@app.get('/tasks/{task_id}')
+@app.get("/tasks/{task_id}")
 def get_status(task_id):
     """Return the status of a task"""
 
+    shitfaced.debugLog(f"Task ID : {task_id}")
     task_result = AsyncResult(task_id)
+    shitfaced.debugLog(f"Task Result : {task_result.status}")
+    return False
     result = {
         "task_id": task_id,
         "task_status": task_result.status,
@@ -56,13 +72,16 @@ async def upload_file(request: Request, file: UploadFile = File(...)):
     if file and shitfaced.allowed_file(file.filename):
         # The image file seems valid! Detect faces and return the result.
         content = await file.read()
-        image_result = create_task.delay(content, file.content_type, shitfaced.DEBUG)
-        image_result = False
+        record_id = await database.create_shitface(content, file.filename, file.content_type, request.headers, database.db)
 
-        shitfaced.debugLog(image_result)
-        if not image_result:
+        shitfaced.debugLog(f'Record is : {record_id}')
+
+        task_result = create_task.delay(str(record_id), shitfaced.DEBUG)
+        shitfaced.debugLog(f"Image Result is : {task_result}")
+
+        if not task_result:
             return JSONResponse({'error': 'balls'})
 
-        return JSONResponse(image_result)
+        return JSONResponse({'task_id': str(task_result)})
     else:
         return JSONResponse({'error': 'balls, incorrect file'})
