@@ -1,12 +1,9 @@
 import os
 
-from celery.exceptions import Ignore
 from shitfaced import setup_celery, process_image, debugLog
 
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-
-from rich import inspect
 
 celery = setup_celery(__name__)
 

@@ -1,4 +1,3 @@
-from rich import inspect
 from celery.result import AsyncResult
 
 from fastapi import FastAPI, File, UploadFile, Request
@@ -43,7 +42,7 @@ def get_status(task_id):
     shitfaced.debugLog(f"Task ID : {task_id}")
     task_result = AsyncResult(task_id)
     shitfaced.debugLog(f"Task Status : {task_result.status}")
-    shitfaced.debugLog(f"Task Result : {task_result.result}")    
+    shitfaced.debugLog(f"Task Result : {task_result.result}")
     result = {
         "task_id": task_id,
         "task_status": task_result.status,

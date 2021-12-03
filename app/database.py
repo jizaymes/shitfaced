@@ -1,19 +1,16 @@
 import os
 
-from io import BytesIO
 from bson.objectid import ObjectId
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from shitfaced import debugLog
-from rich import print, inspect
+from rich import print
 
 
 def setup_mongo() -> AsyncIOMotorClient:
     db: AsyncIOMotorClient = None
 
-    debugLog("Setting up Mongo")
     db = AsyncIOMotorClient(os.environ.get("MONGODB_URL", "mongodb://localhost:27017"))
-    print(db)
     return db["shitfaced"]
 
 
