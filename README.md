@@ -1,10 +1,10 @@
 # shitfaced
-Python FastAPI script using face_recognition to detect and replace faces with the poop emoji
+A grouping of microservices using facial recognition to detect and replace faces with the poop emoji.
 
-run with uvicorn
+This uses Python, FastAPI, MongoDB, Celery, Flower, Redis and Docker
 
-```
-uvicorn app:app --reload
-```
+The docker image creation takes forever because of dlib and cmake in python. Good luck.
 
-Go to web interface at http://localhost:8000 and upload a file, such as one of the included face.jpg files, and it will overlay a poop emoji over the detected faces and return the file to you
+`docker-compose up -d --build`
+
+Then go to web interface at http://localhost:8000 and upload a file, such as one of the included app/test_images/face.jpg files, and it will overlay a poop emoji over the detected faces and return the file to you
