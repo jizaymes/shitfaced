@@ -15,8 +15,8 @@ RESIZE_SCALE = .1
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 ALLOWED_HOSTS = ["*"]
 
-# DEBUG = False
-DEBUG = True
+DEBUG = False
+# DEBUG = True
 
 
 def debugLog(msg):

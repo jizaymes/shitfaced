@@ -1,8 +1,12 @@
 import os
+
+from celery.exceptions import Ignore
 from shitfaced import setup_celery, process_image, debugLog
 
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+
+from rich import inspect
 
 celery = setup_celery(__name__)
 
@@ -40,13 +44,11 @@ def update_shitface_record_pymongo(record_id, data: dict):
 
     result = pymongodb.shitfaces.update_one({"_id": ObjectId(record_id)}, filter)
 
-    print(f"Returning {bool(result)}")
     return bool(result)
 
 
 @celery.task(name="process_image")
 def create_task(record_id, drawRectangle: bool):
-    print("Entering Create Task")
     document = get_shitface_record_pymongo(record_id, True)
 
     if not document:
@@ -54,11 +56,13 @@ def create_task(record_id, drawRectangle: bool):
 
     decoded = document["original_file_contents"]
     shitfaced_file_contents = process_image(decoded, drawRectangle=drawRectangle)
-    print(f"Size of shitfaced_file is {len(shitfaced_file_contents.getvalue())}")
+
+    if not shitfaced_file_contents:
+        raise Exception('Invalid dimensions or image format.')
+
     result = update_shitface_record_pymongo(record_id, {'shitfaced_file_contents': shitfaced_file_contents.getvalue()})
 
     if not result:
-        return False
+        raise Exception('Could not save the shitfaced file to the DB for some reason')
 
-    print(f"Create Task has result of: {record_id}")
     return record_id

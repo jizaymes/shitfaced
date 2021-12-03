@@ -27,7 +27,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 app.add_event_handler("shutdown", database.shutdown_mongo)
 
 
@@ -43,11 +42,12 @@ def get_status(task_id):
 
     shitfaced.debugLog(f"Task ID : {task_id}")
     task_result = AsyncResult(task_id)
-    shitfaced.debugLog(f"Task Result : {task_result.status}")
+    shitfaced.debugLog(f"Task Status : {task_result.status}")
+    shitfaced.debugLog(f"Task Result : {task_result.result}")    
     result = {
         "task_id": task_id,
         "task_status": task_result.status,
-        "task_result": task_result.result
+        "task_result": str(task_result.result)
     }
     return JSONResponse(result)
 
@@ -60,11 +60,7 @@ async def get_shitfaced(mongo_id):
             yield from file_like
 
     bytes_data = await database.get_shitface_image(mongo_id, database.db)
-    # print(f"The size of bytes_data is {len(bytes_data)} and the type is {type(bytes_data)}")
-    # inspect(bytes_data)
     return StreamingResponse(iterimage(bytes_data))
-    # return False
-#     return StreamingResponse(iterimage(task_result.result.getvalue()), media_type=file.content_type)
 
 
 @app.post('/upload', status_code=201)
