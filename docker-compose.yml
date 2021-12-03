@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+
+  web:
+    build: ./app
+    ports:
+      - 8000:8000
+    command: uvicorn app:app --host 0.0.0.0 --reload
+    volumes:
+      - ./app:/app
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - MONGODB_URL=mongodb://mongo:27017/
+    depends_on:
+      - redis
+      - mongo
+    links:
+      - redis
+      - mongo
+
+  worker:
+    build: ./app
+    command: celery --app=worker worker --loglevel=warning
+    volumes:
+      - ./app:/app
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - MONGODB_URL=mongodb://mongo:27017/      
+    depends_on:
+      - redis
+      - mongo
+
+  redis:
+    image: redis:6-alpine
+    ports:
+      - 6379:6379
+
+  mongo:
+    image: mongo:4.0.8
+    ports:
+      - 27017:27017
+
+  dashboard:
+    build: ./app
+    command: celery --app=worker --broker=redis://redis:6379/0 flower
+    ports:
+      - 5555:5555
+    depends_on:
+      - redis
+      - worker
+    links:
+      - redis

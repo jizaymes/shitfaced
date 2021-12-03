@@ -1,0 +1,39 @@
+{% extends "_base.html" %}
+
+{% block content %}
+
+<div class="starter-template">
+  <div>
+    <h1><img src="{{ url_for('static', path='/poop.png') }}" height="10%" width="10%"> Shitfaced!</h1>
+    <hr> 
+    <h5>Let's Get Shitfaced</h5>
+    <p>First, upload an image with faces. We'll throw some shit on their face and spit it right back to you.</p>
+  </div>
+
+
+
+  <div class="btn-group" role="group" aria-label="Basic example" id='upload_area'>
+    <p id="error_area"></p>
+    <input id="file_upload" type="file">
+  </div>
+  
+
+  <div id='pending_area' style="display: none;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="tasks">
+      </tbody>
+    </table>
+  </div>
+
+  <div id='results_area' style="display: none;" >
+    <p id='shitface_image_area' style='text-align: center;'></p>
+  </div>
+
+</div>
+
+{% endblock %}

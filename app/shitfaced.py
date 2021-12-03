@@ -1,13 +1,19 @@
 from PIL import Image, ImageDraw
 from pathlib import Path
-import face_recognition
 from io import BytesIO
 from rich import print
 
-OVERLAY_IMAGE = Path('./poop.png')
+from celery import Celery
+
+import face_recognition
+import os
+
+OVERLAY_IMAGE = Path('./static/poop.png')
 IMAGE_MODE = "RGBA"
 OUTPUT_FORMAT = 'PNG'
 RESIZE_SCALE = .1
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_HOSTS = ["*"]
 
 DEBUG = False
 # DEBUG = True
@@ -15,6 +21,17 @@ DEBUG = False
 
 def debugLog(msg):
     print(f"{msg}") if DEBUG else False
+
+
+def setup_celery(name):
+    celery = Celery(name)
+    celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
+    celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
+    return celery
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def get_faces_from_image(infile):
