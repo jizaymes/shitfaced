@@ -3,17 +3,17 @@
 {% block content %}
 
 <div class="starter-template">
-  <h1>Shitfaced!</h1>
+  <h1><img src="/static/poop.png" height="10%" width="10%"> Shitfaced!</h1>
   <hr><br>
   <div>
-    <h3>Upload an image</h3>
-    <p>Upload a static image (.JPG, .PNG, .GIF) and they'll get shitfaced! </p>
-    <div class="btn-group" role="group" aria-label="Basic example">
-      <input id="file_upload" type="file" onChange="handleClick()">
-    </div>
+    <h4>Let's Get Shitfaced</h3>
+    <p>First, upload an image with faces. We'll throw some shit on their face and spit it right back to you.</p>
+  </div>
+  <div class="btn-group" role="group" aria-label="Basic example" id='upload_area'>
+      <input id="file_upload" type="file">
   </div>
   <br><br>
-  <div>
+  <div disabled=true>
     <h3>Upload Status</h3>
     <br>
     <table class="table">
@@ -21,12 +21,16 @@
         <tr>
           <th>ID</th>
           <th>Status</th>
-          <th>Result</th>
         </tr>
       </thead>
       <tbody id="tasks">
       </tbody>
     </table>
+  </div>
+  <div id="image">
+    <p id='shitfaced_viewport'>
+      Something here
+    </p>
   </div>
 </div>
 

@@ -11,3 +11,4 @@ celery
 py-redis
 pymongo
 motor
+flower

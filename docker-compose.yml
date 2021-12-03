@@ -12,33 +12,44 @@ services:
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - MONGODB_URL=mongodb://mongo:27017/
     depends_on:
       - redis
+      - mongo
+    links:
+      - redis
+      - mongo
 
   worker:
     build: ./app
-    command: celery worker --app=worker.celery --loglevel=info --logfile=logs/celery.log
+    command: celery --app=worker worker --loglevel=warning
     volumes:
-      - ./project:/usr/src/app
+      - ./app:/app
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - MONGODB_URL=mongodb://mongo:27017/      
     depends_on:
-      - web
       - redis
+      - mongo
 
   redis:
     image: redis:6-alpine
+    ports:
+      - 6379:6379
+
+  mongo:
+    image: mongo:4.0.8
+    ports:
+      - 27017:27017
 
   dashboard:
     build: ./app
-    command:  flower --app=worker.celery --port=5555 --broker=redis://redis:6379/0
+    command: celery --app=worker --broker=redis://redis:6379/0 flower
     ports:
-      - 5556:5555
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - 5555:5555
     depends_on:
-      - web
       - redis
       - worker
+    links:
+      - redis

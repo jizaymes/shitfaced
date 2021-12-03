@@ -8,7 +8,7 @@ from celery import Celery
 import face_recognition
 import os
 
-OVERLAY_IMAGE = Path('./poop.png')
+OVERLAY_IMAGE = Path('./static/poop.png')
 IMAGE_MODE = "RGBA"
 OUTPUT_FORMAT = 'PNG'
 RESIZE_SCALE = .1

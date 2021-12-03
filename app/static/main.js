@@ -6,6 +6,14 @@ file_upload.addEventListener('change', () => {
     uploadFile(file_upload.files[0]);
 });
 
+function setImage(taskID) {
+
+  document.getElementById('shitfaced_viewport').innerHTML = `<img src="http://localhost:8000/get_shitfaced/${taskID}">`
+
+  return true;
+}
+
+
 function getStatus(taskID) {
   fetch(`/tasks/${taskID}`, {
     method: 'GET',
@@ -15,30 +23,44 @@ function getStatus(taskID) {
   })
   .then(response => response.json())
   .then(res => {
-    console.log(res)
     const html = `
       <tr>
-        <td>${taskID}</td>
-        <td>${res.task_status}</td>
-        <td>${res.task_result}</td>
+        <td id='taskID_${taskID}'>${taskID}</td>
+        <td id='task_status_${taskID}'>${res.task_status}</td>
+        <td id='task_result_${taskID}'>${res.task_result}</td>        
       </tr>`;
-    const newRow = document.getElementById('tasks').insertRow(0);
-    newRow.innerHTML = html;
+
+    findExistingStatus = document.getElementById('task_status_' + taskID)
+    findExistingResult = document.getElementById('task_result_' + taskID)    
+
+
+    if(!findExistingStatus) {
+      newRow = document.getElementById('tasks').insertRow(0);
+      newRow.innerHTML = html;
+      findExistingStatus = document.getElementById('task_status_' + taskID)
+    }
+    
+    findExistingStatus.innerHTML = res.task_status
 
     const taskStatus = res.task_status;
-    if (taskStatus === 'SUCCESS' || taskStatus === 'FAILURE') return false;
+    if (taskStatus === 'FAILURE') return false;
+
+    if (taskStatus === 'SUCCESS') {
+      setImage(res.task_result);
+      return true;
+    }
     setTimeout(function() {
-      getStatus(res.task_id);
+      getStatus(taskID);
     }, 1000);
   })
   .catch(err => console.log(err));
 }
 
 const uploadFile = (file) => {
+  document.getElementById('upload_area').disabled = true
+  
   const fd = new FormData();
   fd.append('file', file);
-
-  console.log("Upload File")
 
   // send `POST` request
   fetch('/upload', {

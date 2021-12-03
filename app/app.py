@@ -1,3 +1,4 @@
+from rich import inspect
 from celery.result import AsyncResult
 
 from fastapi import FastAPI, File, UploadFile, Request
@@ -43,7 +44,6 @@ def get_status(task_id):
     shitfaced.debugLog(f"Task ID : {task_id}")
     task_result = AsyncResult(task_id)
     shitfaced.debugLog(f"Task Result : {task_result.status}")
-    return False
     result = {
         "task_id": task_id,
         "task_status": task_result.status,
@@ -52,16 +52,18 @@ def get_status(task_id):
     return JSONResponse(result)
 
 
-@app.get('/get_shitfaced/{task_id}')
-async def get_shitfaced(task_id):
+@app.get('/get_shitfaced/{mongo_id}')
+async def get_shitfaced(mongo_id):
     """Return the actual image file"""
     def iterimage(image):
         with BytesIO(image) as file_like:
             yield from file_like
 
-    task_result = AsyncResult(task_id)
-
-    return StreamingResponse(iterimage(task_result.result.getvalue()))
+    bytes_data = await database.get_shitface_image(mongo_id, database.db)
+    # print(f"The size of bytes_data is {len(bytes_data)} and the type is {type(bytes_data)}")
+    # inspect(bytes_data)
+    return StreamingResponse(iterimage(bytes_data))
+    # return False
 #     return StreamingResponse(iterimage(task_result.result.getvalue()), media_type=file.content_type)
 
 
