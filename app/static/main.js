@@ -6,11 +6,6 @@ file_upload.addEventListener('change', () => {
     uploadFile(file_upload.files[0]);
 });
 
-function clearTaskArea()
-{
-  document.getElementById("tasks").innerHTML = ""
-}
-
 function clearErrorArea()
 {
   setError("")
@@ -22,11 +17,9 @@ function setError(text) {
 
 function setImage(mongoId) {
   togglePendingAreaAndResultsAreas();
-  const elementId = "shitface_image_area"
-  const html = `<img src="http://localhost:8000/get_shitfaced/${mongoId}">`
-  const shitface_image_area = document.getElementById(elementId)
 
-  shitface_image_area.innerHTML = html
+  const html = `<img src="get_shitfaced/${mongoId}"><br><br><input type='button' value="Start Over" onClick='location.reload();'>`
+  document.getElementById("shitface_image_area").innerHTML = html
 
   return true;
 }
@@ -41,32 +34,16 @@ function getStatus(taskID) {
   })
   .then(response => response.json())
   .then(res => {
-    const html = `
-      <tr>
-        <td id='task_status_${taskID}'>${res.task_status}</td>    
-      </tr>`;
-
-    findExistingStatus = document.getElementById('task_status_' + taskID)
-
-    if(!findExistingStatus) {
-      newRow = document.getElementById('tasks').insertRow(0);
-      newRow.innerHTML = html;
-      findExistingStatus = document.getElementById('task_status_' + taskID)
-    }
-    
-    findExistingStatus.innerHTML = res.task_status
-
-    const taskStatus = res.task_status;
-    if (taskStatus === 'FAILURE') {
+    if (res.task_status === 'FAILURE') {
       togglePendingAndErrorAreas()
       setError("Failed due to : " + res.task_result)
       return false;
-    }
-
-    if (taskStatus === 'SUCCESS') {
+    } else if (res.task_status === 'SUCCESS') {
       setImage(res.task_result);
       return true;
     }
+
+    // PENDING, just loop and check back in a second
     setTimeout(function() {
       getStatus(taskID);
     }, 1000);
@@ -76,11 +53,9 @@ function getStatus(taskID) {
 
 const uploadFile = (file) => {
   clearErrorArea();
-  clearTaskArea();
+
   const fd = new FormData();
   fd.append('file', file);
-
-  toggleUploadAndPendingAreas();  
 
   // send `POST` request
   fetch('/upload', {
@@ -88,6 +63,7 @@ const uploadFile = (file) => {
       body: fd
   })
   .then(response => response.json())
+  .then(toggleUploadAndPendingAreas())
   .then(task => getStatus(task.task_id))
 
 }

@@ -3,6 +3,8 @@
 {% block content %}
 
 <div class="starter-template">
+
+
   <div>
     <h1><img src="{{ url_for('static', path='/poop.png') }}" height="10%" width="10%"> Shitfaced!</h1>
     <hr> 
@@ -11,28 +13,21 @@
   </div>
 
 
-
-  <div class="btn-group" role="group" aria-label="Basic example" id='upload_area'>
+  <div id='upload_area'>
     <p id="error_area"></p>
     <input id="file_upload" type="file">
   </div>
   
 
   <div id='pending_area' style="display: none;">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="tasks">
-      </tbody>
-    </table>
+      <p style='text-align: center;'><img src="{{ url_for('static', path='/rotating-poop.gif') }}" height="20%" width="20%"></p>
   </div>
+
 
   <div id='results_area' style="display: none;" >
     <p id='shitface_image_area' style='text-align: center;'></p>
   </div>
+
 
 </div>
 
