@@ -8,3 +8,5 @@ The docker image creation takes forever because of dlib and cmake in python. Goo
 `docker-compose up -d --build`
 
 Then go to web interface at http://localhost:8000 and upload a file, such as one of the included app/test_images/face.jpg files, and it will overlay a poop emoji over the detected faces and return the file to you
+
+This was created after reviewing @testdrivenio's tutorial here [https://testdriven.io/blog/fastapi-and-celery/]
