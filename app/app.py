@@ -77,8 +77,8 @@ async def upload_file(request: Request, file: UploadFile = File(...)):
         shitfaced.debugLog(f"Image Result is : {task_result}")
 
         if not task_result:
-            return JSONResponse({'error': 'balls'})
+            return JSONResponse({'error': 'Some kind of error'})
 
         return JSONResponse({'task_id': str(task_result)})
     else:
-        return JSONResponse({'error': 'balls, incorrect file'})
+        return JSONResponse({'error': 'Error, incorrect file'})
