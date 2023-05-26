@@ -33,7 +33,7 @@ def get_shitface_record_pymongo(record_id, include_images: bool = False):
 def update_shitface_record_pymongo(record_id, data: dict):
     debugLog(f'In update_shitface_pymongo record ID is {record_id}')
 
-    if not pymongodb:
+    if pymongodb is None:
         print("returning false")
         return False
 
