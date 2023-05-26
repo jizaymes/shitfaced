@@ -48,7 +48,7 @@ async def create_shitface(file_bytes: bytes, file_name: str, content_type: str, 
 async def get_shitface_image(id, db: AsyncIOMotorClient = None):
     debugLog(f'In get_shitface_image record ID is {id}')
 
-    if not db:
+    if db is None:
         print("No db, returning false")
         return False
 
@@ -64,7 +64,7 @@ async def get_shitface_image(id, db: AsyncIOMotorClient = None):
 async def get_shitface_record(id, filters: dict = None, db: AsyncIOMotorClient = None):
     debugLog(f'In shitface record ID is {id}')
 
-    if not db:
+    if db is None:
         return False
 
     coll = db.get_collection('shitfaces')
@@ -82,7 +82,7 @@ async def get_shitface_record(id, filters: dict = None, db: AsyncIOMotorClient =
 def update_shitface_record(id, data: dict, db: AsyncIOMotorClient = None):
     debugLog(f'In update_shitface record ID is {id}')
 
-    if not db:
+    if db is None:
         return False
 
     coll = db.get_collection('shitfaces')
