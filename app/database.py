@@ -24,7 +24,7 @@ async def shutdown_mongo():
 
 
 async def create_shitface(file_bytes: bytes, file_name: str, content_type: str, http_info: dict, db: AsyncIOMotorClient = None):
-    if not db:
+    if db is None:
         return False
 
     record = {
