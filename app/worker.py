@@ -14,7 +14,7 @@ pymongodb = client.shitfaced
 def get_shitface_record_pymongo(record_id, include_images: bool = False):
     debugLog(f'In shitface_pymongo record ID is {record_id}')
 
-    if not pymongodb:
+    if pymongodb is None:
         return False
 
     filter = {"http_info": 0}
