@@ -6,6 +6,9 @@ services:
     build: ./app
     ports:
       - 8000:8000
+    networks:
+      - shitfaced
+      - backend      
     command: uvicorn app:app --host 0.0.0.0 --reload
     volumes:
       - ./app:/app
@@ -22,7 +25,9 @@ services:
 
   worker:
     build: ./app
-    command: celery --app=worker worker --loglevel=warning
+    command: celery --app=worker worker --uid=nobody --gid=nogroup --loglevel=warning
+    networks:
+      - backend
     volumes:
       - ./app:/app
     environment:
@@ -34,22 +39,30 @@ services:
       - mongo
 
   redis:
-    image: redis:6-alpine
-    ports:
-      - 6379:6379
+    image: redis:7-alpine
+    volumes:
+      - data:/data
+    networks:
+      - backend
 
   mongo:
     image: mongo:4.0.8
-    ports:
-      - 27017:27017
+    networks:
+      - backend
 
   dashboard:
     build: ./app
     command: celery --app=worker --broker=redis://redis:6379/0 flower
-    ports:
-      - 5555:5555
+    networks:
+      - backend
     depends_on:
       - redis
       - worker
     links:
       - redis
+
+
+networks:
+  shitfaced:
+  backend:
+    external: true
