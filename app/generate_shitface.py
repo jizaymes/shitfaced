@@ -1,37 +1,19 @@
 from PIL import Image, ImageDraw
-from pathlib import Path
 from io import BytesIO
 from rich import print
-
-from celery import Celery
 
 import face_recognition
 import os
 
-OVERLAY_IMAGE = Path('./static/poop.png')
-IMAGE_MODE = "RGBA"
-OUTPUT_FORMAT = 'PNG'
-RESIZE_SCALE = .1
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-ALLOWED_HOSTS = ["*"]
-
-DEBUG = False
-# DEBUG = True
+import config
 
 
 def debugLog(msg):
-    print(f"{msg}") if DEBUG else False
-
-
-def setup_celery(name):
-    celery = Celery(name)
-    celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
-    celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
-    return celery
+    print(f"{msg}") if config.DEBUG else False
 
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in config.ALLOWED_EXTENSIONS
 
 
 def get_faces_from_image(infile):
@@ -39,6 +21,19 @@ def get_faces_from_image(infile):
     face_locations = face_recognition.face_locations(image)
     face_encodings = face_recognition.face_encodings(image, face_locations)
     return face_locations, face_encodings
+
+
+def get_emoji_list(use_web_path: bool = False):
+    emoji_list = []
+
+    for emoji in os.listdir(config.EMOJI_FILE_PATH):
+        if allowed_file(emoji):
+            if use_web_path:
+                emoji_list.append(f"{config.EMOJI_WEB_PATH}/{emoji}")
+            else:
+                emoji_list.append(emoji)
+
+    return emoji_list
 
 
 def apply_scaling(top, right, bottom, left, scale: float):
@@ -62,10 +57,10 @@ def apply_scaling(top, right, bottom, left, scale: float):
     return tt, rr, bb, ll
 
 
-def process_image(infile, drawRectangle=False):
+def generate_shitface(infile, overlay_image: str, drawRectangle: bool = False):
 
-    # Convert the incoming image to a Pillow image in memory, and conver to the right mode
-    infile_image = Image.open(BytesIO(infile)).convert(IMAGE_MODE)
+    # Convert the incoming image to a Pillow image in memory, and conver tto the right mode
+    infile_image = Image.open(BytesIO(infile)).convert(config.IMAGE_MODE)
 
     h, w = infile_image.size
     debugLog(f"h {h} w {w}")
@@ -73,7 +68,9 @@ def process_image(infile, drawRectangle=False):
         return False
 
     # Load the overlay image and convert it to the right mode
-    overlay_image = Image.open(OVERLAY_IMAGE).convert(IMAGE_MODE)
+    overlay_image = f"{config.EMOJI_FILE_PATH}/{overlay_image}"
+    debugLog(overlay_image)
+    overlay_image = Image.open(overlay_image).convert(config.IMAGE_MODE)
 
     face_locations, face_encodings = get_faces_from_image(infile)
 
@@ -81,7 +78,7 @@ def process_image(infile, drawRectangle=False):
         debugLog("-- New Face {{")
         debugLog(f"Top {top}, Right {right}, Bottom {bottom}, Left {left}")
 
-        tt, rr, bb, ll = apply_scaling(top, right, bottom, left, RESIZE_SCALE)
+        tt, rr, bb, ll = apply_scaling(top, right, bottom, left, config.RESIZE_SCALE)
 
         debugLog("  New face params")
         debugLog(f"Top {tt}, Right {rr}, Bottom {bb}, Left {ll}")
@@ -100,6 +97,7 @@ def process_image(infile, drawRectangle=False):
         debugLog("}} End Face")
 
     img_byte_arr = BytesIO()
-    infile_image.save(img_byte_arr, format=OUTPUT_FORMAT)
+
+    infile_image.save(img_byte_arr, format=config.OUTPUT_FORMAT)
 
     return img_byte_arr

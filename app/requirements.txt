@@ -10,5 +10,7 @@ jinja2
 celery
 py-redis
 pymongo
-motor
 flower
+boto3
+python-magic
+typing

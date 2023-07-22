@@ -12,10 +12,8 @@ services:
     command: uvicorn app:app --host 0.0.0.0 --reload
     volumes:
       - ./app:/app
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - MONGODB_URL=mongodb://mongo:27017/
+    env_file:
+      - shitfaced.env
     depends_on:
       - redis
       - mongo
@@ -30,10 +28,8 @@ services:
       - backend
     volumes:
       - ./app:/app
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - MONGODB_URL=mongodb://mongo:27017/      
+    env_file:
+      - shitfaced.env
     depends_on:
       - redis
       - mongo
@@ -47,6 +43,8 @@ services:
 
   mongo:
     image: mongo:4.0.8
+    ports:
+      - 27017:27017
     networks:
       - backend
 

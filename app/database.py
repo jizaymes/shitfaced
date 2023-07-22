@@ -1,95 +1,115 @@
-import os
-
 from bson.objectid import ObjectId
-from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import MongoClient
 
-from shitfaced import debugLog
 from rich import print
+import datetime
+
+import config
 
 
-def setup_mongo() -> AsyncIOMotorClient:
-    db: AsyncIOMotorClient = None
+class ShitfaceDB:
+    db = None
+    _mongo_client = None
 
-    db = AsyncIOMotorClient(os.environ.get("MONGODB_URL", "mongodb://localhost:27017"))
-    return db["shitfaced"]
+    def __init__(self):
+        self.setup_mongo()
 
+    def setup_mongo(self):
+        self._mongo_client = MongoClient(config.MONGODB_URL, serverSelectionTimeoutMS=config.MONGO_SERVER_SELECTION_TIMEOUT)
+        mydb = self._mongo_client.shitfaced
+        self.db = mydb.shitfaces
 
-db = setup_mongo()
+    def create_shitface_record(self, original_file_hash: str, original_file_name: str, original_file_content_type: str, http_info: dict):
+        if self._mongo_client is None:
+            return False
 
+        record = {
+            'http_info': http_info,
+            'create_date': datetime.datetime.now(),
+            'original_file_name': original_file_name,
+            'original_file_content_type': original_file_content_type,
+            'original_file_hash': original_file_hash,
+            'original_file_url': '',
+            'original_file_info': '',
 
-async def shutdown_mongo():
-    debugLog("Shutting down Mongo")
-    if db:
-        db.client.close()
+            'overlay_image': '',
 
+            'processed_file_name': '',
+            'processed_file_content_type': '',
+            'processed_file_hash': '',
+            'processed_file_url': '',
+            'processed_file_info': '',
+        }
 
-async def create_shitface(file_bytes: bytes, file_name: str, content_type: str, http_info: dict, db: AsyncIOMotorClient = None):
-    if db is None:
-        return False
+        row = self.db.insert_one(record)
 
-    record = {
-        'original_file_name': file_name,
-        'content_type': content_type,
-        'http_info': http_info,
-        'original_file_contents': file_bytes,
-        'shitfaced_file_contents': '',
-    }
+        if not row:
+            return False
 
-    coll = db.get_collection('shitfaces')
+        self.debugLog(f"I just created a shitface! {row.inserted_id}")
 
-    row = await coll.insert_one(record)
+        return row.inserted_id
 
-    if not row:
-        return False
+    def update_shitface_record(self, id, data: dict):
+        self.debugLog(f'In update_shitface_record() : id is {id}')
 
-    return row.inserted_id
+        if self._mongo_client is None:
+            return False
 
+        updates = {"$set": data}
 
-async def get_shitface_image(id, db: AsyncIOMotorClient = None):
-    debugLog(f'In get_shitface_image record ID is {id}')
+        self.debugLog(f"About to update {updates}")
+        row = self.db.update_one({"_id": ObjectId(id)}, updates)
+        if not row:
+            return False
 
-    if db is None:
-        print("No db, returning false")
-        return False
+        return row
 
-    row = await get_shitface_record(id, {'shitfaced_file_contents': 1}, db)
+    def image_exists(self, file_hash, selected_emoji: str):
+        self.debugLog(f"In image_exists for ({file_hash}, {selected_emoji})")
 
-    if not row:
-        print("Returning False")
-        return False
+        if self._mongo_client is None:
+            return False
 
-    return row["shitfaced_file_contents"]
+        filters = {}
 
+        query = {"$or": [{
+            "original_file_hash": file_hash,
+            }, {
+            "processed_file_hash": file_hash,
+            }],
+            "$and": [{
+                "overlay_image": selected_emoji,
+            }]
+        }
+        row = self.db.find_one(query, filters)
 
-async def get_shitface_record(id, filters: dict = None, db: AsyncIOMotorClient = None):
-    debugLog(f'In shitface record ID is {id}')
+        if not row:
+            self.debugLog(f"image_exists is False. Didntfind anything for {file_hash}")
+            return False
 
-    if db is None:
-        return False
+        # self.debugLog(f"Image exists about to return {row['_id']}")
+        return row['_id']
 
-    coll = db.get_collection('shitfaces')
+    def get_shitface_record(self, record_id, filters: dict = None):
+        self.debugLog(f'In get_shitface_record. id is {record_id}')
 
-    query = {"_id": ObjectId(id)}
+        if self._mongo_client is None:
+            return False
 
-    row = await coll.find_one(query, filters)
+        query = {"_id": ObjectId(record_id)}
 
-    if not row:
-        return False
+        row = self.db.find_one(query, filters)
 
-    return row
+        if not row:
+            self.debugLog("Leaving get_shitface_record empty handed. No record found")
+            return False
 
+        return row
 
-def update_shitface_record(id, data: dict, db: AsyncIOMotorClient = None):
-    debugLog(f'In update_shitface record ID is {id}')
+    def disconnect_mongo(self):
+        if self._mongo_client is not None:
+            self._mongo_client.close()
 
-    if db is None:
-        return False
-
-    coll = db.get_collection('shitfaces')
-
-    row = coll.replace_one({"_id": id}, **data)
-
-    if not row:
-        return False
-
-    return row
+    def debugLog(self, msg):
+        print(f"{msg}") if config.DEBUG else False

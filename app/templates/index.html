@@ -2,33 +2,48 @@
 
 {% block content %}
 
-<div class="starter-template">
+<div class="container my-1">
+  <div class="p-1 text-center bg-body-tertiary rounded-3">
+    <div class="d-inline-flex gap-2 mb-1">
+      <img class="rounded-lg-3" src="{{ url_for('static', path='/emojis/poop.png') }}" alt="" height="180">
+    </div>
+    <h1 class="text-body-emphasis mb-5">Shitfaced!</h1>
+    
+    <div class="container my-5">
+      <div id="notifications_area" class="my-1">
+        <div id="error_area" class="alert alert-danger" style="display: none;"></div>
+        <div id="success_area" class="alert alert-success" style="display: none;"></div>
+      </div>
 
-
-  <div>
-    <h1><img src="{{ url_for('static', path='/poop.png') }}" height="10%" width="10%"> Shitfaced!</h1>
-    <hr> 
-    <h5>Let's Get Shitfaced</h5>
-    <p>First, upload an image with faces. We'll throw some shit on their face and spit it right back to you.</p>
+      <div id='upload_area'>
+        <p class="col-lg-8 mx-auto fs-5 text-muted">
+          <b>First</b>, upload an image with faces in it.<br>We'll throw some shit on their face and spit it right back to you.
+        </p>
+    
+        <div class="d-flex flex-column flex-md-row p-1 gap-1 py-md-1 align-items-center justify-content-center">
+          <div class="list-group list-group-horizontal list-group-checkable d-grid gap-2">
+          {% for emoji in emoji_list %}
+          {% set emoji_list_work = emoji.split('/') %}
+              <input class="list-group-item-check pe-none form-check" type="radio" name="selected_emoji" id="emoji_item_{{loop.index}}" value="{{emoji_list_work[1]}}" {% if emoji_list_work[1] == "poop.png" %}checked{% endif %}>
+              <label class="list-group-item rounded-3 py-3 stretched-link" for="emoji_item_{{loop.index}}">
+              <img  src="{{ url_for('static', path=emoji) }}" width="10%">
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+        <input id="file_upload" class="btn btn-primary btn-sm" type="file">
+      </div>
+    
+      <div id='pending_area' style="display: none;">
+          <p style='text-align: center;'><img src="{{ url_for('static', path='/images/rotating-poop.gif') }}" height="20%" width="20%"></p>
+      </div>
+    
+      <div id='results_area' style="display: none;" >
+        <p id='shitface_image_area' style='text-align: center;'></p>
+      </div>
+    </div>
   </div>
-
-
-  <div id='upload_area'>
-    <p id="error_area"></p>
-    <input id="file_upload" type="file">
-  </div>
-  
-
-  <div id='pending_area' style="display: none;">
-      <p style='text-align: center;'><img src="{{ url_for('static', path='/rotating-poop.gif') }}" height="20%" width="20%"></p>
-  </div>
-
-
-  <div id='results_area' style="display: none;" >
-    <p id='shitface_image_area' style='text-align: center;'></p>
-  </div>
-
-
 </div>
+
 
 {% endblock %}
