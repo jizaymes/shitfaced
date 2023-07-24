@@ -1,12 +1,11 @@
 from generate_shitface import generate_shitface
-from fastapi.responses import JSONResponse
 from database import ShitfaceDB
 import boto3
 import hashlib
 import magic
 from typing import Optional
 import config
-from celery import Celery
+from celery import Celery, current_task, states
 from mimetypes import guess_extension
 
 s3client_processed = boto3.client("s3", **config.PROCESSED_OBJ_STORAGE_CONFIG)
@@ -34,12 +33,12 @@ def process_image(record_id, original_image, overlay_image: Optional[str] = None
     document = db.get_shitface_record(record_id)
 
     if not document:
-        return JSONResponse({'error': "Error, No Shitface Record in worker:process_image"})
+        current_task.update_state(state=states.FAILURE, meta={'status': "No Shitface Record in worker:process_image"})
+        raise Exception({'error': "Error, No Shitface Record in worker:process_image"})
 
     shitfaced_file_contents = generate_shitface(original_image, overlay_image=overlay_image, drawRectangle=drawRectangle)
-
-    if not shitfaced_file_contents:
-        return JSONResponse({'error': 'Invalid dimensions or image format.'})
+    if type(shitfaced_file_contents) is dict:
+        raise Exception(shitfaced_file_contents)
 
     to_upload = shitfaced_file_contents.getvalue()
 
@@ -49,7 +48,7 @@ def process_image(record_id, original_image, overlay_image: Optional[str] = None
 
     if existing_record_id is not False:
         record_id = existing_record_id
-        return JSONResponse({'error': 'Already exists, shouldnt get here'})
+        return {'error': 'Already exists, shouldnt get here'}
 
     else:
         guessed_mimetype = magic.from_buffer(to_upload, mime=True)
@@ -69,4 +68,4 @@ def process_image(record_id, original_image, overlay_image: Optional[str] = None
         if db.update_shitface_record(record_id, updates):
             return record_id
         else:
-            return JSONResponse({'error': 'Could not save the shitfaced file to the DB for some reason'})
+            return {'error': 'Could not save the shitfaced file to the DB for some reason'}

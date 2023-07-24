@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ExifTags, UnidentifiedImageError
 from io import BytesIO
 from rich import print
 
@@ -6,6 +6,10 @@ import face_recognition
 import os
 
 import config
+
+from pillow_heif import register_heif_opener
+
+register_heif_opener()
 
 
 def debugLog(msg):
@@ -17,7 +21,7 @@ def allowed_file(filename):
 
 
 def get_faces_from_image(infile):
-    image = face_recognition.load_image_file(BytesIO(infile))
+    image = face_recognition.load_image_file(infile)
     face_locations = face_recognition.face_locations(image)
     face_encodings = face_recognition.face_encodings(image, face_locations)
     return face_locations, face_encodings
@@ -57,22 +61,87 @@ def apply_scaling(top, right, bottom, left, scale: float):
     return tt, rr, bb, ll
 
 
-def generate_shitface(infile, overlay_image: str, drawRectangle: bool = False):
-
+def validate_image(infile_base):
     # Convert the incoming image to a Pillow image in memory, and conver tto the right mode
-    infile_image = Image.open(BytesIO(infile)).convert(config.IMAGE_MODE)
+    try:
+        infile_image = Image.open(BytesIO(infile_base))
+    except UnidentifiedImageError:
+        return {'error': 'Sorry, image in not valid'}
 
     h, w = infile_image.size
-    debugLog(f"h {h} w {w}")
     if h < 150 and w < 150:
-        return False
+        debugLog(f"h {h} w {w}")
+        return {'error': 'Sorry, image is too small to process'}
+
+    return infile_image
+
+
+def needs_rotating(infile_exif_data):
+    if infile_exif_data:
+        for key, val in infile_exif_data:
+            if key in ExifTags.TAGS:
+                debugLog(f'{ExifTags.TAGS[key]}:{val}')
+                # TileWidth:512
+                # TileLength:512
+                # ResolutionUnit:2
+                # ExifOffset:248
+                # Make:Apple
+                # Model:iPhone 13 Pro
+                # Software:16.5.1
+                # Orientation:6
+                # DateTime:2023:07:15 14:27:50
+                # YCbCrPositioning:1
+                # XResolution:72.0
+                # YResolution:72.0
+                # HostComputer:iPhone 13 Pro
+
+                if ExifTags.TAGS[key] == "Orientation" and val == 6:
+                    debugLog("NEEDS TO BE ROTATED")  # IOS ?
+                    return val
+
+    return False
+
+
+def generate_shitface(infile, overlay_image: str, drawRectangle: bool = False):
+
+    # Try to validate the image and then error if need be
+    infile_base = validate_image(infile)
+
+    if type(infile_base) is dict:
+        return infile_base
+
+    # Load EXIF data if its there
+    infile_exif_data = infile_base.getexif().items()
+
+    # Determine if we need to rotate
+    orientation = needs_rotating(infile_exif_data)
+
+    # Convert to a PNG
+    infile_image = infile_base.convert(config.IMAGE_MODE)
+
+    if orientation is not False:
+        rotation = 0
+
+        if orientation == 6:  # IOS
+            rotation = -90
+
+        debugLog("About to rotate")
+
+        if rotation != 0:
+            infile_image = infile_image.rotate(rotation)
+            debugLog("Did rotate that")
+    else:
+        debugLog("Doesn't need rotating")
 
     # Load the overlay image and convert it to the right mode
     overlay_image = f"{config.EMOJI_FILE_PATH}/{overlay_image}"
-    debugLog(overlay_image)
     overlay_image = Image.open(overlay_image).convert(config.IMAGE_MODE)
 
-    face_locations, face_encodings = get_faces_from_image(infile)
+    image_bytes = BytesIO()
+
+    infile_image.save(image_bytes, format=config.OUTPUT_FORMAT)
+
+    face_locations, face_encodings = get_faces_from_image(image_bytes)
 
     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
         debugLog("-- New Face {{")

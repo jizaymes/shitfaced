@@ -6,8 +6,31 @@ file_upload.addEventListener('change', () => {
   uploadFile(file_upload.files[0]);
 });
 
+
+function openModal() {
+  document.getElementById("backdrop").style.display = "block"
+  document.getElementById("image_modal").style.display = "block"
+  document.getElementById("image_modal").classList.add("show")
+}
+function closeModal() {
+  document.getElementById("backdrop").style.display = "none"
+  document.getElementById("image_modal").style.display = "none"
+  document.getElementById("image_modal").classList.remove("show")
+}
+// Get the modal
+const modal = document.getElementById('image_modal');
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+if (event.target == modal) {
+  closeModal()
+}
+}
+
+
+
 const uploadFile = (file) => {
-  if(!['image/jpeg', 'image/png', 'image/gif'].includes(file.type))
+  if(!['image/jpeg', 'image/png', 'image/gif', 'image/heic'].includes(file.type))
 	{
     setError("Invalid File Type");
     return;
@@ -81,19 +104,34 @@ function setSuccess(text) {
 }
 
 
+
 function setImage(record_id, msg) {
   togglePendingAreaAndResultsAreas();
   setSuccess(msg)
 
   const html = `
-  <div class="container my-5">
-    <div class="row p-2 pb-0 pe-lg-0 pt-sm-2 align-items-center rounded-2 border shadow-lg mx-auto">
-      <div class="col-lg-5 p-5 p-lg-2 pt-lg-2 mx-auto">
-        <p class="text-center"><img class="img-fluid rounded mx-auto d-block border" src="get_shitfaced/${record_id}"></p>
-        <button type="button" class="btn btn-primary btn-sm px-2 me-md-2 fw-bold position-center" onClick='location.reload();'>Start Over</button>
+  <div class="modal fade" id="image_modal" tabindex="-1" aria-labelledby="image_modal_label" aria-modal="true" role="dialog">
+  
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="image_modal_label"></h5>
+              <button type="button" class="close" aria-label="Close" onclick="closeModal()">
+                  <span aria-hidden="true">X</span>
+              </button>
+          </div>
+          <div class="modal-body">
+            <img src="get_shitfaced/${record_id}" class="img-responsive" style="width: 100%;">
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
+          </div>
       </div>
-    </div>
   </div>
+</div>                
+<div class="modal-backdrop fade show" id="backdrop" style="display: none;"></div>
+<p class="text-center"><img class="show-img" src="get_shitfaced/${record_id}" style="width: 255px;" onClick='openModal();'></p>
+<button type="button" class="btn btn-primary btn-sm px-2 me-md-2 fw-bold position-center" onClick='location.reload();'>Start Over</button>
   `
   
   
@@ -115,6 +153,10 @@ function getStatus(taskID) {
     if (res.task_status === 'FAILURE') {
       togglePendingAndErrorAreas()
       setError("Failed due to : " + res.task_result)
+      return false;
+    } else if (res.task_result == "False") {
+      togglePendingAndErrorAreas()
+      setError("Failed due to a bad image or a problem")
       return false;
     } else if (res.task_status === 'SUCCESS') {
       setImage(res.task_result,"");

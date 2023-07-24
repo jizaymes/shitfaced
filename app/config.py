@@ -1,7 +1,7 @@
 import os
 
 # Debug Logging
-DEBUG = os.environ.get('DEBUG', False)
+DEBUG = os.environ.get('DEBUG', True)
 
 MONGODB_URL = os.environ.get('MONGODB_URL', "mongodb://mongo:27017")
 MONGO_SERVER_SELECTION_TIMEOUT = os.environ.get("MONGO_SERVER_SELECTION_TIMEOUT", 5000)
@@ -10,7 +10,7 @@ CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', ["http://localhost:8000"])
-ALLOWED_EXTENSIONS = os.environ.get('ALLOWED_EXTENSIONS', ['png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = os.environ.get('ALLOWED_EXTENSIONS', ['png', 'jpg', 'jpeg', 'gif', 'heic'])
 MAX_ALLOWED_FILESIZE = os.environ.get('MAX_ALLOWED_FILESIZE', 4194304)
 
 EMOJI_FILE_PATH = "static/emojis"

@@ -31,6 +31,7 @@ class ShitfaceDB:
             'original_file_hash': original_file_hash,
             'original_file_url': '',
             'original_file_info': '',
+            'original_exif_data': '',
 
             'overlay_image': '',
 
@@ -58,7 +59,7 @@ class ShitfaceDB:
 
         updates = {"$set": data}
 
-        self.debugLog(f"About to update {updates}")
+        # self.debugLog(f"About to update {updates}")
         row = self.db.update_one({"_id": ObjectId(id)}, updates)
         if not row:
             return False
@@ -85,7 +86,7 @@ class ShitfaceDB:
         row = self.db.find_one(query, filters)
 
         if not row:
-            self.debugLog(f"image_exists is False. Didntfind anything for {file_hash}")
+            self.debugLog(f"image_exists is False. Didnt find anything for {file_hash}")
             return False
 
         # self.debugLog(f"Image exists about to return {row['_id']}")

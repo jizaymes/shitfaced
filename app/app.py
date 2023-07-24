@@ -133,7 +133,6 @@ async def upload_file(request: Request, file_upload: Annotated[UploadFile, File(
 
     # Guess a file extension to append. Chose to do this instead of honor what file extension gets uploaded.
     extension = guess_extension(file_upload.content_type)
-    debugLog(f"Extension {extension}")
 
     # Give it a new file name
     newfn = str(record_id) + extension
@@ -150,12 +149,15 @@ async def upload_file(request: Request, file_upload: Annotated[UploadFile, File(
     if res is False:
         return JSONResponse({'error': "MongoDB Error"})
 
-    if task_result := process_image.delay(
+    task_result = process_image.delay(
         str(record_id),
         file_contents,
         overlay_image=selected_emoji,
         drawRectangle=config.DRAW_RECTANGLE,
-    ):
-        return JSONResponse({'task_id': str(task_result)})
-    else:
-        return JSONResponse({'error': 'Some kind of error'})
+    )
+
+    if type(task_result) is dict:
+        return JSONResponse(task_result)
+
+    print(task_result)
+    return JSONResponse({'task_id': str(task_result)})
