@@ -8,12 +8,13 @@ file_upload.addEventListener('change', () => {
 
 
 function openModal() {
-  document.getElementById("backdrop").style.display = "block"
+  // document.getElementById("backdrop").style.display = "block"
   document.getElementById("image_modal").style.display = "block"
+  document.getElementById("img_modal_result").src = document.getElementById("img_result").src
   document.getElementById("image_modal").classList.add("show")
 }
 function closeModal() {
-  document.getElementById("backdrop").style.display = "none"
+  // document.getElementById("backdrop").style.display = "none"
   document.getElementById("image_modal").style.display = "none"
   document.getElementById("image_modal").classList.remove("show")
 }
@@ -22,9 +23,9 @@ const modal = document.getElementById('image_modal');
 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
-if (event.target == modal) {
-  closeModal()
-}
+  if (event.target == modal) {
+    closeModal()
+  }
 }
 
 
@@ -110,30 +111,29 @@ function setImage(record_id, msg) {
   setSuccess(msg)
 
   const html = `
-  <div class="modal fade" id="image_modal" tabindex="-1" aria-labelledby="image_modal_label" aria-modal="true" role="dialog">
-  
-  <div class="modal-dialog" role="document">
+  <div class="modal" id="image_modal" tabindex="-1" aria-labelledby="image_modal_label" aria-modal="true" role="dialog">
+    
+  <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
       <div class="modal-content">
           <div class="modal-header">
-              <h5 class="modal-title" id="image_modal_label"></h5>
-              <button type="button" class="close" aria-label="Close" onclick="closeModal()">
-                  <span aria-hidden="true">X</span>
-              </button>
+              <h4 class="modal-title" id="image_modal_label"></h4>
+              <button type="button" class="btn-close" onclick="closeModal()"></button>
           </div>
           <div class="modal-body">
-            <img src="get_shitfaced/${record_id}" class="img-responsive" style="width: 100%;">
+            <img id="img_modal_result" style="width: 100%;">
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
           </div>
       </div>
   </div>
-</div>                
-<div class="modal-backdrop fade show" id="backdrop" style="display: none;"></div>
-<p class="text-center"><img class="show-img" src="get_shitfaced/${record_id}" style="width: 255px;" onClick='openModal();'></p>
-<button type="button" class="btn btn-primary btn-sm px-2 me-md-2 fw-bold position-center" onClick='location.reload();'>Start Over</button>
+  </div>
+
+  <div class="row p-2 pb-0 pe-lg-0 pt-sm-2 align-items-center rounded-2 border shadow-lg mx-auto">
+    <p class="text-center"><img class="show-img img-responsive rounded border" id="img_result" src="get_shitfaced/${record_id}" alt="Shitfaced record ${record_id}" style="width: 100%; max-width: 500px;" onClick='openModal();'></p>
+    <p><button type="button" class="btn btn-primary btn-sm fw-bold position-center" onClick='location.reload();'>Start Over</button></p>
+  </div>
   `
-  
   
   document.getElementById("shitface_image_area").innerHTML = html
 

@@ -48,7 +48,9 @@ services:
 
   dashboard:
     build: ./app
-    command: celery --app=worker --broker=redis://redis:6379/0 flower
+    command: celery --app=worker flower
+    env_file:
+      - shitfaced.env    
     networks:
       - backend
     depends_on:
