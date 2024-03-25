@@ -7,8 +7,7 @@ services:
     ports:
       - 8000:8000
     networks:
-      - shitfaced
-      - backend      
+      - backend
     command: uvicorn app:app --host 0.0.0.0 --reload
     volumes:
       - ./app:/app
@@ -20,6 +19,8 @@ services:
     links:
       - redis
       - mongo
+    restart: unless-stopped
+
 
   worker:
     build: ./app
@@ -33,6 +34,7 @@ services:
     depends_on:
       - redis
       - mongo
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
@@ -40,17 +42,19 @@ services:
       - data:/data
     networks:
       - backend
+    restart: unless-stopped
 
   mongo:
     image: mongo:4.0.8
     networks:
       - backend
+    restart: unless-stopped
 
   dashboard:
     build: ./app
     command: celery --app=worker flower
     env_file:
-      - shitfaced.env    
+      - shitfaced.env
     networks:
       - backend
     depends_on:
@@ -58,10 +62,10 @@ services:
       - worker
     links:
       - redis
+    restart: unless-stopped
 
 
 networks:
-  shitfaced:
   backend:
     external: true
 
