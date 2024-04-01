@@ -18,27 +18,31 @@ from mimetypes import guess_extension
 from worker import process_image
 import config
 
-s3client_incoming = boto3.client("s3", **config.INCOMING_OBJ_STORAGE_CONFIG)
-s3client_processed = boto3.client("s3", **config.PROCESSED_OBJ_STORAGE_CONFIG)
 
-db = ShitfaceDB()
-app = FastAPI()
 
-emoji_list = generate_shitface.get_emoji_list(use_web_path=True)
+if __name__ == "__main__":
+    s3client_incoming = boto3.client("s3", **config.INCOMING_OBJ_STORAGE_CONFIG)
+    s3client_processed = boto3.client("s3", **config.PROCESSED_OBJ_STORAGE_CONFIG)
 
-# Make sure our static files and templates are mapped through for js/css, etc
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+    db = ShitfaceDB()
+    app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=config.ALLOWED_HOSTS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+    emoji_list = generate_shitface.get_emoji_list(use_web_path=True)
 
-app.add_event_handler("shutdown", db.disconnect_mongo)
+    # Make sure our static files and templates are mapped through for js/css, etc
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+    templates = Jinja2Templates(directory="templates")
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=config.ALLOWED_HOSTS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    app.add_event_handler("shutdown", db.disconnect_mongo)
+
 
 
 def debugLog(msg):
@@ -159,5 +163,6 @@ async def upload_file(request: Request, file_upload: Annotated[UploadFile, File(
     if type(task_result) is dict:
         return JSONResponse(task_result)
 
+    ## TODO: This seems suspect
     print(task_result)
     return JSONResponse({'task_id': str(task_result)})
