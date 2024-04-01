@@ -20,28 +20,28 @@ import config
 
 
 
-if __name__ == "__main__":
-    s3client_incoming = boto3.client("s3", **config.INCOMING_OBJ_STORAGE_CONFIG)
-    s3client_processed = boto3.client("s3", **config.PROCESSED_OBJ_STORAGE_CONFIG)
+# if __name__ == "__main__":
+s3client_incoming = boto3.client("s3", **config.INCOMING_OBJ_STORAGE_CONFIG)
+s3client_processed = boto3.client("s3", **config.PROCESSED_OBJ_STORAGE_CONFIG)
 
-    db = ShitfaceDB()
-    app = FastAPI()
+db = ShitfaceDB()
+app = FastAPI()
 
-    emoji_list = generate_shitface.get_emoji_list(use_web_path=True)
+emoji_list = generate_shitface.get_emoji_list(use_web_path=True)
 
-    # Make sure our static files and templates are mapped through for js/css, etc
-    app.mount("/static", StaticFiles(directory="static"), name="static")
-    templates = Jinja2Templates(directory="templates")
+# Make sure our static files and templates are mapped through for js/css, etc
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=config.ALLOWED_HOSTS,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=config.ALLOWED_HOSTS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    app.add_event_handler("shutdown", db.disconnect_mongo)
+app.add_event_handler("shutdown", db.disconnect_mongo)
 
 
 
