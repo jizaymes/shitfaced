@@ -46,9 +46,22 @@ services:
 
   mongo:
     image: mongo:4.0.8
+    ports:
+      - 27017:27017
     networks:
       - backend
     restart: unless-stopped
+
+  mongo-express:
+    image: mongo-express:latest
+    ports:
+      - 8081:8081
+    env_file:
+      - shitfaced.env      
+    networks:
+      - backend
+    restart: unless-stopped
+
 
   dashboard:
     build: ./app

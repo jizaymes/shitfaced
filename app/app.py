@@ -19,8 +19,6 @@ from worker import process_image
 import config
 
 
-
-# if __name__ == "__main__":
 s3client_incoming = boto3.client("s3", **config.INCOMING_OBJ_STORAGE_CONFIG)
 s3client_processed = boto3.client("s3", **config.PROCESSED_OBJ_STORAGE_CONFIG)
 
@@ -42,7 +40,6 @@ app.add_middleware(
 )
 
 app.add_event_handler("shutdown", db.disconnect_mongo)
-
 
 
 def debugLog(msg):
@@ -143,9 +140,9 @@ async def upload_file(request: Request, file_upload: Annotated[UploadFile, File(
 
     # create linode file object
     response_obj = s3client_incoming.put_object(Body=file_contents, Bucket=config.INCOMING_BUCKET, Key=newfn)
-
+    
     # Update some info about the file, like the new URL and the log of the file upload
-    shitface_record['original_file_url'] = f"{config.INCOMING_OBJ_STORAGE_CONFIG['endpoint_url']}/{newfn}"
+    shitface_record['original_file_url'] = f"{config.INCOMING_BUCKET}/{newfn}"
     shitface_record['original_file_info'] = response_obj
     res = db.update_shitface_record(record_id, shitface_record)
 
@@ -163,6 +160,6 @@ async def upload_file(request: Request, file_upload: Annotated[UploadFile, File(
     if type(task_result) is dict:
         return JSONResponse(task_result)
 
-    ## TODO: This seems suspect
+    ## TODO: This seems suspect to be removed.
     print(task_result)
     return JSONResponse({'task_id': str(task_result)})

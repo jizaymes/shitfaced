@@ -11,6 +11,11 @@ from pillow_heif import register_heif_opener
 
 register_heif_opener()
 
+MIN_HEIGHT = 150
+MIN_WIDTH = 150
+MAX_HEIGHT = 4000
+MAX_WIDTH = 4000
+
 
 def debugLog(msg):
     print(f"{msg}") if config.DEBUG else False
@@ -69,9 +74,14 @@ def validate_image(infile_base):
         return {'error': 'Sorry, image in not valid'}
 
     h, w = infile_image.size
-    if h < 150 and w < 150:
+
+    if h < MIN_HEIGHT and w < MIN_WIDTH:
         debugLog(f"h {h} w {w}")
         return {'error': 'Sorry, image is too small to process'}
+
+    if h > MAX_HEIGHT and w > MAX_WIDTH:
+        debugLog(f"h {h} w {w}")
+        return {'error': 'Sorry, image is too large to process'}
 
     return infile_image
 

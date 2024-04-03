@@ -60,7 +60,7 @@ def process_image(record_id, original_image, overlay_image: Optional[str] = None
             'overlay_image': overlay_image,
             'processed_file_hash': file_hash,
             'processed_file_info': response_obj,
-            'processed_file_url': f"{config.PROCESSED_OBJ_STORAGE_CONFIG['endpoint_url']}/{newfn}",
+            'processed_file_url': f"{config.PROCESSED_BUCKET}/{newfn}",
             'processed_file_name': newfn,
             'processed_file_content_type': guessed_mimetype,
         }

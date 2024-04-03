@@ -1,23 +1,107 @@
+from typing import Optional
 from bson.objectid import ObjectId
 from pymongo import MongoClient
+from bson.son import SON
 
-from rich import print
+from rich import print, inspect
 import datetime
 
 import config
 
-
-class ShitfaceDB:
+class BaseMongoDB:
     db = None
     _mongo_client = None
+
+    mydb_name = ''
+    mydb_collection = ''
 
     def __init__(self):
         self.setup_mongo()
 
     def setup_mongo(self):
-        self._mongo_client = MongoClient(config.MONGODB_URL, serverSelectionTimeoutMS=config.MONGO_SERVER_SELECTION_TIMEOUT)
-        mydb = self._mongo_client.shitfaced
-        self.db = mydb.shitfaces
+        if config.MONGODB_URL and self.mydb_name and self.mydb_collection:
+            self._mongo_client = MongoClient(config.MONGODB_URL, serverSelectionTimeoutMS=config.MONGO_SERVER_SELECTION_TIMEOUT)
+            mydb = eval(f'self._mongo_client.{self.mydb_name}')
+            self.db = eval(f'mydb.{self.mydb_collection}')
+
+    def disconnect_mongo(self):
+        if self._mongo_client is not None:
+            self._mongo_client.close()
+
+    def debugLog(self, msg):
+        print(f"{msg}") if config.DEBUG else False
+
+
+class EmojiDB(BaseMongoDB):
+    mydb_name = 'shitfaced'
+    mydb_collection = 'emojis'
+
+    def create_emoji_record(self, emojiinfo: dict):
+        if self._mongo_client is None:
+            return False
+
+        row = self.db.insert_one(emojiinfo)
+
+        if not row:
+            return False
+
+        self.debugLog(f"I just created an emoji! {row.inserted_id}")
+
+        return row.inserted_id
+
+    def get_count(self, group: Optional[str] = None) -> int:
+        filter = {}
+
+        if group: 
+            filter = {"group" : group}
+
+        return self.db.count_documents(filter)
+
+    def get_groups(self) -> list:
+        filter = {}
+        filter["$group"] = {}
+        filter["$group"]["_id"] = "$group"
+
+        results = self.db.aggregate([filter])
+        newres = []
+        for row in results:
+            newres.append(row["_id"])
+
+        return newres
+
+
+    def get_group_counts(self) -> int:
+        filter = {}
+        filter["$group"] = {}
+        filter["$group"]["_id"] = "$group"
+        filter["$group"]["count"] = {"$sum": 1 }
+
+        results = self.db.aggregate([filter])
+        newres = []
+        for row in results:
+            newres.append({row["_id"]: row['count']})
+
+        return newres
+
+    def get_emoji_record(self, emoji):
+        self.debugLog(f'In get_emoji. Requested Emoji is [ {emoji} ]')
+
+        if self._mongo_client is None:
+            return False
+
+        query = {"emoji": emoji}
+
+        row = self.db.find_one(query, {})
+
+        if not row:
+            self.debugLog("Leaving get_emoji empty handed. No record found")
+            return False
+
+        return row
+
+class ShitfaceDB(BaseMongoDB):
+    mydb_name = 'shitfaced'
+    mydb_collection = 'shitfaces'
 
     def create_shitface_record(self, original_file_hash: str, original_file_name: str, original_file_content_type: str, http_info: dict):
         if self._mongo_client is None:
