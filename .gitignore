@@ -1,5 +1,6 @@
 .DS_Store
 shitfaced.env
-app/static/emojis/
+app/static/emojis/*.png
+app/static/emojis/offline/*.png
 app/openmoji.json
 .venv
