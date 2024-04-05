@@ -8,7 +8,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from io import BytesIO
 from typing import Annotated
-import generate_shitface
 from database import ShitfaceDB
 import boto3
 import hashlib
@@ -18,6 +17,7 @@ from mimetypes import guess_extension
 from worker import process_image
 import config
 
+import util
 
 s3client_incoming = boto3.client("s3", **config.INCOMING_OBJ_STORAGE_CONFIG)
 s3client_processed = boto3.client("s3", **config.PROCESSED_OBJ_STORAGE_CONFIG)
@@ -25,7 +25,7 @@ s3client_processed = boto3.client("s3", **config.PROCESSED_OBJ_STORAGE_CONFIG)
 db = ShitfaceDB()
 app = FastAPI()
 
-emoji_list = generate_shitface.get_emoji_list(use_web_path=True)
+emoji_list = util.get_emoji_list(use_web_path=True)
 
 # Make sure our static files and templates are mapped through for js/css, etc
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -40,6 +40,9 @@ app.add_middleware(
 )
 
 app.add_event_handler("shutdown", db.disconnect_mongo)
+
+
+
 
 
 def debugLog(msg):
@@ -102,7 +105,7 @@ async def upload_file(request: Request, file_upload: Annotated[UploadFile, File(
         selected_emoji = "poop.png"
 
     # Check that its valid
-    if not file_upload or not generate_shitface.allowed_file(file_upload.filename):
+    if not file_upload or not util.allowed_file(file_upload.filename):
         return JSONResponse({'error': 'Error, incorrect file'})
 
     file_contents = await file_upload.read()
