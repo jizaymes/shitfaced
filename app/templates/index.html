@@ -2,8 +2,7 @@
 
 {% block content %}
 
-<div class="container my-1">
-  <div class="p-1 text-center bg-body-tertiary rounded-3">
+<div class="p-1 text-center bg-body-tertiary rounded-3">
     <div class="d-inline-flex gap-2 mb-1">
       <img class="rounded-lg-3" src="{{ url_for('static', path='/images/shitfaced_logo.png') }}" alt="" height="180">
     </div> <!-- <div class="d-inline-flex -->
@@ -15,10 +14,11 @@
         <div id="success_area" class="alert alert-success" style="display: none;"></div>
       </div> <!-- <div id="notifications_area" -->
 
-      <div id='upload_area'>
+      <div id='upload_area' align='center'>
         <p class="col-lg-8 mx-auto fs-5 text-muted">
-          <b>First</b>, upload an image with faces in it.<br>We'll throw some shit on their face and spit it right back to you.
+          <b>First</b>, pick an emoji, then <b>Upload</b> an image with faces in it.<br>We'll throw some shit on their face and spit it right back to you.
         </p>
+        <div class="flex">
           {% set cnt = namespace(value=0) %}
           {% for emoji in emoji_list -%}
           {%- set emoji_list_work = emoji.split('/') %}
@@ -31,10 +31,10 @@
           {% endif %}
           <li class="list-group-item">
               <input type="radio" id="emoji_item_{{loop.index}}" value="{{emoji_list_work[1]}}" class="hidden list-group-item-check" name="selected_emoji" required>
-              <label for="emoji_item_{{loop.index}}" class="list-group-item">
-                <img src="{{ url_for('static', path=emoji) }}" width="100%" alt="">
+              <label for="emoji_item_{{loop.index}}" class="list-group-item col-lg">
+                <img src="{{ url_for('static', path=emoji) }}" class="img-fluid" alt="">
               </label>
-            </li>
+          </li>
           {% set cnt.value = cnt.value + 1 %}
           {% endfor %}
             <!-- <li>
@@ -60,49 +60,53 @@
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
                     </svg>
                 </label>
-            </li> -->
-        </ul>
+            </li>
+        </ul> -->
+
+      </div>
+        <!-- <div class="flex items-center justify-center w-full">
+          <label for="file_upload" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+              <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                  <svg class="border w-8 h-8 mb-5 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="butt" stroke-width=".75" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                  </svg>
+              </div> 
+                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG or GIF (Min 120 x 120px, Max 4000 x 4000 px)</p>
+                <input type="file" name="file_upload" class="hidden" id="file_upload">
+          </label>
+        </div> -->
         
-
-
-
-
-
-
-
-
-
-
-
-
-            <div class="flex items-center justify-center w-full">
-              <label for="file_upload" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                  <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                      <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                      </svg>
-                      <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG or GIF (Min 120 x 120px, Max 4000 x 4000 px)</p>
-                  </div> <!-- <div class="flex -->
-                  <input type="file" name="file_upload" class="hidden" id="file_upload">
-                </label>
-            </div> <!-- <div class="flex items-center -->
-          
-
-
-
+        <div class="flex items-center justify-center w-full">
+        <fieldset class="dropzone text-center mb-3 p-4">
+          <legend class="visually-hidden">Image uploader</legend>
+          <svg class="upload_svg" width="60" height="60" aria-hidden="true">
+            <use href="#icon-imageUpload"></use>
+          </svg>
+          <p class="small my-2">Drag &amp; Drop an image<br><i><small>(PNG, JPG or GIF (Min 120 x 120px, Max 4000 x 4000 px)</small></i><br>or</p>      
+          <input id="file_upload" data-post-name="file_upload" data-post-url="" class="position-absolute invisible" type="file" multiple accept="image/jpeg, image/png, image/gif, image/heic, image/heif" />
+          <label class="btn btn-upload mb-3 border" for="file_upload">Click to upload</label>     
+          <div class="upload_gallery d-flex flex-wrap justify-content-center gap-3 mb-0"></div>
+        </fieldset>
+        <svg style="display:none">
+          <defs>
+            <symbol id="icon-imageUpload" clip-rule="evenodd" viewBox="0 0 96 96">
+              <path d="M47 6a21 21 0 0 0-12.3 3.8c-2.7 2.1-4.4 5-4.7 7.1-5.8 1.2-10.3 5.6-10.3 10.6 0 6 5.8 11 13 11h12.6V22.7l-7.1 6.8c-.4.3-.9.5-1.4.5-1 0-2-.8-2-1.7 0-.4.3-.9.6-1.2l10.3-8.8c.3-.4.8-.6 1.3-.6.6 0 1 .2 1.4.6l10.2 8.8c.4.3.6.8.6 1.2 0 1-.9 1.7-2 1.7-.5 0-1-.2-1.3-.5l-7.2-6.8v15.6h14.4c6.1 0 11.2-4.1 11.2-9.4 0-5-4-8.8-9.5-9.4C63.8 11.8 56 5.8 47 6Zm-1.7 42.7V38.4h3.4v10.3c0 .8-.7 1.5-1.7 1.5s-1.7-.7-1.7-1.5Z M27 49c-4 0-7 2-7 6v29c0 3 3 6 6 6h42c3 0 6-3 6-6V55c0-4-3-6-7-6H28Zm41 3c1 0 3 1 3 3v19l-13-6a2 2 0 0 0-2 0L44 79l-10-5a2 2 0 0 0-2 0l-9 7V55c0-2 2-3 4-3h41Z M40 62c0 2-2 4-5 4s-5-2-5-4 2-4 5-4 5 2 5 4Z"/>
+            </symbol>
+          </defs>
+        </svg>
+       </div>
       </div> <!-- <div id='upload_area'> -->
-    
+
       <div id='pending_area' style="display: none;">
           <p style='text-align: center;'><img src="{{ url_for('static', path='/images/rotating-poop.gif') }}" height="20%" width="20%"></p>
       </div> <!-- <div id='pending_area'-->
-    
+
       <div id='results_area' style="display: none;" >
         <p id='shitface_image_area' style='text-align: center;'></p>
       </div> <!-- <div id='results_area'-->
+
     </div> <!-- <div class="container my-5"> -->
   </div> <!-- <div class="p-1 text -->
-</div> <!-- <div class="container my-1"> -->
-
 
 {% endblock %}

@@ -1,4 +1,18 @@
-/* custom css */
+:root {
+  --colorPrimaryNormal: #a0591e;
+  --colorPrimaryDark: #815f1d;
+  --colorPrimaryGlare: #a05f1a;
+  --colorPrimaryHalf: #3d2805;
+  --colorPrimaryQuarter: #bfecee;
+  --colorPrimaryEighth: #dff5f7;
+  --colorPrimaryPale: #f3f5f7;
+  --colorPrimarySeparator: #f3f5f7;
+  --colorPrimaryOutline: #dff5f7;
+  --colorButtonNormal: #bc741d;
+  --colorButtonHover: #f39d35;
+  --colorLinkNormal: #00979f;
+  --colorLinkHover: #00cdd7;
+}
 
 html {
     position: relative;
@@ -15,4 +29,35 @@ body {
   height: 50px;
   line-height: 50px;
 }
-  
+.dropzone {
+  color: #0f3c4b;
+  background-color: var(--colorPrimaryPale, #c8dadf);
+  outline: 2px dashed var(--colorPrimaryHalf, #c1ddef);
+  outline-offset: -12px;
+  transition:
+    outline-offset 0.2s ease-out,
+    outline-color 0.3s ease-in-out,
+    background-color 0.2s ease-out;
+}
+.dropzone.highlight {
+  outline-offset: -4px;
+  outline-color: var(--colorPrimaryNormal, #b5b5b5);
+  background-color: var(--colorPrimaryEighth, #c8dadf);
+}
+.upload_svg {
+  fill: var(--colorPrimaryNormal, #0576bd);
+}
+.btn-upload {
+  color: #f19340;
+  background-color: var(--colorPrimaryNormal);
+}
+.btn-upload:hover,
+.btn-upload:focus {
+  color: #f4cfaf;
+  background-color: var(--colorPrimaryGlare);
+}
+.upload_img {
+  width: calc(33.333% - (2rem / 3));
+  object-fit: contain;
+}
+
