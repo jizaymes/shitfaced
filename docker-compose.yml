@@ -45,6 +45,8 @@ services:
   dashboard:
     build: ./app
     command: celery --app=worker flower
+    ports:
+      - 5555:5555
     depends_on:
       - redis
       - worker
