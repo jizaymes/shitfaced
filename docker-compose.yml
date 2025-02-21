@@ -1,18 +1,13 @@
 version: '3.3'
 
 services:
-
   web:
     build: ./app
     ports:
       - 8000:8000
-    networks:
-      - backend
     command: uvicorn app:app --host 0.0.0.0 --reload
     volumes:
       - ./app:/app
-    env_file:
-      - shitfaced.env
     depends_on:
       - redis
       - mongo
@@ -21,16 +16,11 @@ services:
       - mongo
     restart: unless-stopped
 
-
   worker:
     build: ./app
     command: celery --app=worker worker --uid=nobody --gid=nogroup --loglevel=warning
-    networks:
-      - backend
     volumes:
       - ./app:/app
-    env_file:
-      - shitfaced.env
     depends_on:
       - redis
       - mongo
@@ -40,16 +30,12 @@ services:
     image: redis:alpine
     volumes:
       - redis_data:/data
-    networks:
-      - backend
     restart: unless-stopped
 
   mongo:
     image: mongo:latest
     ports:
       - 27017:27017
-    networks:
-      - backend
     volumes:
       - mongo_data:/data/db
     restart: unless-stopped
@@ -58,31 +44,17 @@ services:
     image: mongo-express:latest
     ports:
       - 8081:8081
-    env_file:
-      - shitfaced.env      
-    networks:
-      - backend
     restart: unless-stopped
-
 
   dashboard:
     build: ./app
     command: celery --app=worker flower
-    env_file:
-      - shitfaced.env
-    networks:
-      - backend
     depends_on:
       - redis
       - worker
     links:
       - redis
     restart: unless-stopped
-
-
-networks:
-  backend:
-    external: true
 
 volumes:
   redis_data:
