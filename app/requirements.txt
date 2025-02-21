@@ -11,7 +11,7 @@ celery
 py-redis
 pymongo
 flower
-boto3:1.35.25
+boto3==1.35.25
 python-magic
 typing
 pillow-heif
