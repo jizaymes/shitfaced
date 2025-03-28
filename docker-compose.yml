@@ -3,8 +3,8 @@ version: '3.3'
 services:
   web:
     build: ./app
-    ports:
-      - 8001:8000
+    # ports:
+    #   - 8000:8000
     command: uvicorn app:app --host 0.0.0.0 --reload --proxy-headers --forwarded-allow-ips '*'
     volumes:
       - ./app:/app
@@ -45,8 +45,8 @@ services:
   dashboard:
     build: ./app
     command: celery --app=worker flower
-    ports:
-      - 5555:5555
+    # ports:
+    #   - 5555:5555
     depends_on:
       - redis
       - worker
