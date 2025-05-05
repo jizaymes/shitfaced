@@ -39,3 +39,6 @@ PROCESSED_OBJ_STORAGE_CONFIG = {
     "endpoint_url": os.environ.get('PROCESSED_BUCKET_URL'),
 }
 PROCESSED_BUCKET = os.environ.get('PROCESSED_BUCKET')
+
+TRACKING_CODE_URL = os.environ.get('TRACKING_CODE_URL', 'localhost')
+TRACKING_CODE_WEBSITE_ID = os.environ.get('TRACKING_CODE_WEBSITE_ID', '1234')
