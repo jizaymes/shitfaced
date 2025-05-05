@@ -22,6 +22,9 @@ import util
 s3client_incoming = boto3.client("s3", **config.INCOMING_OBJ_STORAGE_CONFIG)
 s3client_processed = boto3.client("s3", **config.PROCESSED_OBJ_STORAGE_CONFIG)
 
+tracking_code_url = config.TRACKING_CODE_URL
+tracking_code_website_id = config.TRACKING_CODE_WEBSITE_ID
+
 db = ShitfaceDB()
 app = FastAPI()
 
